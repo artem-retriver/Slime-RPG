@@ -4942,4 +4942,5 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rb: {fileID: 7327025937886173224}
-  speed: 4
+  speed: 8
+  isBullet: 0

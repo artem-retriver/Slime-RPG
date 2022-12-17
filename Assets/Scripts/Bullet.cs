@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class Bullet : MonoBehaviour
 {
-    //public Slime slime;
     public Rigidbody rb;
     public int speed;
 
@@ -24,7 +23,6 @@ public class Bullet : MonoBehaviour
     {
         if(other.TryGetComponent(out Enemy _))
         {
-            Debug.Log("+");
             isBullet = true;
         }
     }

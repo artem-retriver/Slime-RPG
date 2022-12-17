@@ -1,21 +1,23 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class Slime : MonoBehaviour
 {
+    public AnimationController controller;
+    public GameManager gameManager;
     public Bullet[] bulletPrefabs;
+    public Slider slider;
 
-    public List<Bullet> activeBullet = new List<Bullet>();
+    public List<Bullet> activeBullet = new();
 
     public int speedSlime = 5;
-    public int spd = 1;
+    public float spd = 1;
     public int atk = 1;
     public int hp = 1;
-    public int posDelete = 0;
 
     public bool isBattle = false;
-    public bool isBulletOn = false;
     public bool isEnemy = false;
     public bool isAlive = true;
 
@@ -24,21 +26,27 @@ public class Slime : MonoBehaviour
     private void Start()
     {
         rb = GetComponent<Rigidbody>();
-        StartCoroutine(WaitShoot());
+        
     }
 
     private void Update()
     {
+        slider.value = hp;
+
         for (int i = 0; i < activeBullet.Count; i++)
         {
-            if (activeBullet[i].transform.position.x >= transform.position.x + 7)
+            if (activeBullet[i].transform.position.x >= transform.position.x + 6)
             {
-                Destroy(activeBullet[i]);
+                Destroy(activeBullet[i].gameObject);
                 activeBullet.RemoveAt(i);
             }
+        }
 
+        for (int i = 0; i < activeBullet.Count; i++)
+        {
             if (activeBullet[i].isBullet == true)
             {
+                gameManager.activeEnemy[i].hp -= atk;
                 Destroy(activeBullet[i].gameObject);
                 activeBullet.RemoveAt(i);
             }
@@ -52,6 +60,20 @@ public class Slime : MonoBehaviour
         {
             MoveCharacter();
         }
+
+        if(isEnemy == false)
+        {
+            UnAttackSlime();
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if(other.TryGetComponent(out Enemy _))
+        {
+            isEnemy = true;
+            AttackSlime();
+        }
     }
 
     public void Battle()
@@ -64,18 +86,40 @@ public class Slime : MonoBehaviour
 
     public void MoveCharacter()
     {
+        controller.SetWalkTrigger();
         rb.velocity = Vector3.right * speedSlime;
+    }
+
+    public void AttackSlime()
+    {
+        InvokeRepeating(nameof(Attack), spd, spd);
+        controller.SetDamageTrigger();
+    }
+
+    public void UnAttackSlime()
+    {
+        CancelInvoke(nameof(Attack));
+    }
+
+    public void Attack()
+    {
+        hp -= gameManager.activeEnemy[0].atk;
     }
 
     public void UnMoveCharacter()
     {
+        controller.SetAttackTrigger();
         rb.velocity = Vector3.right * 0;
     }
 
-    public IEnumerator WaitShoot()
+    public void CancelInvokeBattle()
     {
-        yield return new WaitForSeconds(1.8f);
-        InvokeRepeating(nameof(Battle), spd, spd);
-        Battle();
+        CancelInvoke(nameof(Battle));
+    }
+
+    public void InvokeBattle()
+    {
+        InvokeRepeating(nameof(Battle), 3.5f, spd);
+        
     }
 }
